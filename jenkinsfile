@@ -5,6 +5,10 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+                // Allow Jenkins to use the Flutter SDK repository
+                bat 'git config --global --add safe.directory C:/src/flutter'
+
+                // Get Flutter dependencies
                 bat 'flutter pub get'
             }
         }
@@ -23,15 +27,24 @@ pipeline {
 
         stage('Build Web') {
             steps {
-                bat 'flutter build web --release'
+                bat 'flutter build web'
             }
         }
 
         stage('Archive Web') {
             steps {
-                archiveArtifacts artifacts: 'build\\web\\**',
-                                  fingerprint: true
+                archiveArtifacts artifacts: 'build/web/**', allowEmptyArchive: false
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Flutter pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Flutter pipeline failed. Please check the stage above for the error.'
         }
     }
 }
